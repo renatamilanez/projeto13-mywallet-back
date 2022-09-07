@@ -1,0 +1,32 @@
+{
+  "name": "projeto13-mywallet-back",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/renatamilanez/projeto13-mywallet-back.git"
+  },
+  "keywords": [],
+  "author": "renatamilanez",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/renatamilanez/projeto13-mywallet-back/issues"
+  },
+  "homepage": "https://github.com/renatamilanez/projeto13-mywallet-back#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dayjs": "^1.11.5",
+    "express": "^4.18.1",
+    "joi": "^17.6.0",
+    "mongodb": "^4.9.1",
+    "string-strip-html": "^11.6.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.19"
+  }
+}
