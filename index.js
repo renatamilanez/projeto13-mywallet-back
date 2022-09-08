@@ -125,9 +125,8 @@ server.get('/records', async (req, res) => {
         const records = await db.collection('records').find({
             userId: user._id
         }).toArray();
-        console.log(records);
 
-        return res.sendStatus(200).send(records);
+        return res.send(records);
 
     } catch (error) { 
         console.error(error);
@@ -138,16 +137,9 @@ server.get('/records', async (req, res) => {
 server.post('/records', async (req, res) => {
     const token = req.headers.authorization?.replace("Bearer ", "");
     const data = req.body;
-    const value = (data.value).toFixed(2);
-    const description = stripHtml(data.description).result.trim();
-    const type = data.type;
 
     if (!token){
         return res.sendStatus(401);
-    }
-
-    if(!value || !description){
-        return res.sendStatus(400);
     }
 
     const validation = recordSchema.validate(data, {abortEarly: false});
@@ -155,7 +147,11 @@ server.post('/records', async (req, res) => {
     if(validation.error){
         const errors = validation.error.details.map(detail => detail.message);
         return res.sendStatus(400).send(errors);
-    } 
+    }
+
+    const value = (data.value).toFixed(2);
+    const description = stripHtml(data.description).result.trim();
+    const type = data.type;
 
     try {
         const session = await db.collection('sessions').findOne({
