@@ -26,6 +26,12 @@ const userSchema = joi.object({
     repeat_password: joi.ref('password')
 });
 
+const recordSchema = joi.object({
+    description: joi.string().required(),
+    value: joi.number().positive().precision(2).required(),
+    type: joi.valid('positive', 'negative')
+})
+
 server.post('/sign-in', async (req, res) => {
     const {email, password} = req.body;
 
@@ -119,6 +125,7 @@ server.get('/records', async (req, res) => {
         const records = await db.collection('records').find({
             userId: user._id
         }).toArray();
+        console.log(records);
 
         return res.sendStatus(200).send(records);
 
@@ -129,7 +136,56 @@ server.get('/records', async (req, res) => {
 });
 
 server.post('/records', async (req, res) => {
+    const token = req.headers.authorization?.replace("Bearer ", "");
+    const data = req.body;
+    const value = (data.value).toFixed(2);
+    const description = stripHtml(data.description).result.trim();
+    const type = data.type;
 
+    if (!token){
+        return res.sendStatus(401);
+    }
+
+    if(!value || !description){
+        return res.sendStatus(400);
+    }
+
+    const validation = recordSchema.validate(data, {abortEarly: false});
+
+    if(validation.error){
+        const errors = validation.error.details.map(detail => detail.message);
+        return res.sendStatus(400).send(errors);
+    } 
+
+    try {
+        const session = await db.collection('sessions').findOne({
+            token
+        });
+
+        if(!session){
+            return res.sendStatus(401);
+        }
+
+        const user = await db.collection('users').findOne({
+            _id: session.userId
+        });
+
+        if(!user){
+            return res.sendStatus(401);
+        }
+
+        const record = await db.collection('records').insertOne({
+            userId: user._id,
+            value,
+            description,
+            type
+        });
+
+        return res.sendStatus(200);
+    } catch (error) {
+        console.error(error);
+        return res.sendStatus(500);
+    }
 });
 
 server.listen(3000, ()=> {
