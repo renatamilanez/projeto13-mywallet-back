@@ -26,15 +26,33 @@ const userSchema = joi.object({
     repeat_password: joi.ref('password')
 });
 
-//LOGIN
 server.post('/sign-in', async (req, res) => {
-    const token = req.headers.authorization?.replace("Bearer ", "");
-    
-    if(!token){
-        res.sendStatus(401);
+    const {email, password} = req.body;
+
+    if(!email || !password){
+        return res.sendStatus(400);
     }
 
     try {
+        const user = await db.collection('users').findOne({email});
+
+        if(!user){
+            return res.sendStatus(401);
+        }
+
+        const isValid = bcrypt.compareSync(password, user.password);
+
+        if(!isValid){
+            return res.sendStatus(401);
+        }
+        
+        const token = uuidv4();
+        db.collection('sessions').insertOne({
+            email,
+            token,
+            userId: user._id 
+        });
+
         return res.sendStatus(200);
     } catch (error) {
         console.error(error);
@@ -94,18 +112,20 @@ server.get('/records', async (req, res) => {
             _id: session.userId
         });
 
+        if(!user){
+            return res.sendStatus(401);
+        }
+
         const records = await db.collection('records').find({
             userId: user._id
         }).toArray();
 
-        return res.send(records);
+        return res.sendStatus(200).send(records);
 
     } catch (error) { 
         console.error(error);
         return res.sendStatus(500);
     }
-
-    return res.send(200);
 });
 
 server.post('/records', async (req, res) => {
