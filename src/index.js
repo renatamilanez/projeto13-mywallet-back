@@ -1,16 +1,14 @@
 import express from 'express';
 import cors from 'cors';
-import {userSignIn, userSignUp} from "./controllers/users.controller.js";
-import {getRecords, createRecord} from "./controllers/records.controller.js";
+import signInRouter from "./routers/signIn.router.js";
+import signUpRouter from "./routers/signUp.router.js";
+import recordsRouters from "./routers/records.routers.js";  
 
 const server = express();
 server.use(cors()); 
 server.use(express.json());
 
-server.post('/sign-in', userSignIn);
-server.post('/sign-up', userSignUp); 
-server.get('/records', getRecords);
-server.post('/records', createRecord);
+server.use(signInRouter, signUpRouter, recordsRouters);
 
 server.listen(4000, ()=> {
     console.log('Listening on Port 4000');
