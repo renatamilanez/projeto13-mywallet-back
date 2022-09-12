@@ -13,29 +13,9 @@ const recordSchema = joi.object({
 });
 
 async function getRecords(req, res){
-    const token = req.headers.authorization?.replace("Bearer ", "");
-
-    if (!token){
-        return res.sendStatus(401);
-    }
+    const user = res.locals.user;
 
     try {
-        const session = await db.collection('sessions').findOne({
-            token
-        });
-
-        if(!session){
-            return res.sendStatus(401);
-        }
-
-        const user = await db.collection('users').findOne({
-            _id: session.userId
-        });
-
-        if(!user){
-            return res.sendStatus(401);
-        }
-
         const records = await db.collection('records').find({
             userId: user._id
         }).toArray();
@@ -49,13 +29,8 @@ async function getRecords(req, res){
 }
 
 async function createRecord(req, res) {
-    const token = req.headers.authorization?.replace("Bearer ", "");
+    const user = res.locals.user;
     const data = req.body;
-
-    if (!token){
-        return res.sendStatus(401);
-    }
-
     const validation = recordSchema.validate(data, {abortEarly: false});
 
     if(validation.error){
@@ -69,22 +44,6 @@ async function createRecord(req, res) {
     const date = now.format("DD/MM");
 
     try {
-        const session = await db.collection('sessions').findOne({
-            token
-        });
-
-        if(!session){
-            return res.sendStatus(401);
-        }
-
-        const user = await db.collection('users').findOne({
-            _id: session.userId
-        });
-
-        if(!user){
-            return res.sendStatus(401);
-        }
-
         const record = await db.collection('records').insertOne({
             userId: user._id,
             value,

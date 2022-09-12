@@ -31,7 +31,7 @@ async function userSignUp(req, res) {
             return res.sendStatus(409);
         };
 
-        const user = await db.collection('users').insertOne({
+        await db.collection('users').insertOne({
             name,
             email,
             password: hashPassword
