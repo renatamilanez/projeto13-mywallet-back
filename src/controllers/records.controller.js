@@ -2,6 +2,7 @@ import joi from 'joi';
 import db from "../database/db.js";
 import { stripHtml } from 'string-strip-html';
 import dayjs from 'dayjs';
+import {ObjectId} from 'mongodb';
 
 dayjs().format();
 let now = dayjs();
@@ -59,4 +60,17 @@ async function createRecord(req, res) {
     }
 }
 
-export {getRecords, createRecord};
+async function deleteRecord(req, res){
+    const {id} = req.params;
+    console.log(id);
+
+    try {
+        await db.collection('records').deleteOne({ _id: new ObjectId(id) });
+        res.sendStatus(200);
+    } catch (error) {
+        console.error(error);
+        res.sendStatus(500);
+    }
+}
+
+export {getRecords, createRecord, deleteRecord};
